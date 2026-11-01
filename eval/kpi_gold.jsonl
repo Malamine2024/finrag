@@ -1,0 +1,50 @@
+{"company": "aircanada", "year": 2019, "kpi": "net_income", "value_m": 1476}
+{"company": "aircanada", "year": 2020, "kpi": "net_income", "value_m": -4647}
+{"company": "aircanada", "year": 2021, "kpi": "net_income", "value_m": -3602}
+{"company": "aircanada", "year": 2020, "kpi": "revenue", "value_m": 5833}
+{"company": "aircanada", "year": 2021, "kpi": "revenue", "value_m": 6400}
+{"company": "aircanada", "year": 2021, "kpi": "total_assets", "value_m": 30614}
+{"company": "aircanada", "year": 2021, "kpi": "diluted_eps", "value_m": -10.25}
+{"company": "shopify", "year": 2017, "kpi": "revenue", "value_m": 673.304}
+{"company": "shopify", "year": 2018, "kpi": "revenue", "value_m": 1073.229}
+{"company": "shopify", "year": 2019, "kpi": "revenue", "value_m": 1578.173}
+{"company": "shopify", "year": 2020, "kpi": "revenue", "value_m": 2929.491}
+{"company": "shopify", "year": 2021, "kpi": "revenue", "value_m": 4611.856}
+{"company": "shopify", "year": 2022, "kpi": "revenue", "value_m": 5599.864}
+{"company": "banquenationale", "year": 2019, "kpi": "revenue", "value_m": 7432, "source": "banquenationale_2020 etat consolide des resultats"}
+{"company": "banquenationale", "year": 2020, "kpi": "revenue", "value_m": 7927, "source": "banquenationale_2021 etat consolide des resultats"}
+{"company": "banquenationale", "year": 2021, "kpi": "revenue", "value_m": 8927, "source": "banquenationale_2021 etat consolide des resultats"}
+{"company": "banquenationale", "year": 2019, "kpi": "net_income", "value_m": 2322, "source": "banquenationale_2020 etat consolide des resultats"}
+{"company": "banquenationale", "year": 2020, "kpi": "net_income", "value_m": 2083, "source": "banquenationale_2021 etat consolide des resultats"}
+{"company": "banquenationale", "year": 2021, "kpi": "net_income", "value_m": 3177, "source": "banquenationale_2021 etat consolide des resultats"}
+{"company": "cgi", "year": 2019, "kpi": "revenue", "value_m": 12111.236, "source": "cgi_2020 etats consolides du resultat p.6"}
+{"company": "cgi", "year": 2020, "kpi": "revenue", "value_m": 12164.115, "source": "cgi_2020 etats consolides du resultat p.6"}
+{"company": "cgi", "year": 2021, "kpi": "revenue", "value_m": 12126.8, "source": "cgi_2021 sommaire des huit derniers trimestres (somme T1-T4)"}
+{"company": "cgi", "year": 2019, "kpi": "net_income", "value_m": 1263.207, "source": "cgi_2020 etats consolides du resultat p.6"}
+{"company": "cgi", "year": 2020, "kpi": "net_income", "value_m": 1117.862, "source": "cgi_2021 etats consolides du resultat global"}
+{"company": "cgi", "year": 2021, "kpi": "net_income", "value_m": 1369.072, "source": "cgi_2021 etats consolides du resultat global"}
+{"company": "cgi", "year": 2019, "kpi": "total_assets", "value_m": 12621.7, "source": "cgi_2020 sommaire des huit derniers trimestres"}
+{"company": "cgi", "year": 2020, "kpi": "total_assets", "value_m": 15550.4, "source": "cgi_2021 sommaire des huit derniers trimestres"}
+{"company": "cgi", "year": 2021, "kpi": "total_assets", "value_m": 15021.0, "source": "cgi_2021 sommaire des huit derniers trimestres"}
+{"company": "couchetard", "year": 2019, "kpi": "revenue", "value_m": 59117.6, "source": "couchetard_2020 analyse sommaire des resultats"}
+{"company": "couchetard", "year": 2020, "kpi": "revenue", "value_m": 54132.4, "source": "couchetard_2021 etats consolides des resultats"}
+{"company": "couchetard", "year": 2021, "kpi": "revenue", "value_m": 45760.1, "source": "couchetard_2021 etats consolides des resultats"}
+{"company": "couchetard", "year": 2019, "kpi": "net_income", "value_m": 1821.3, "source": "couchetard_2020 analyse sommaire des resultats"}
+{"company": "couchetard", "year": 2020, "kpi": "net_income", "value_m": 2357.6, "source": "couchetard_2021 etats consolides des resultats"}
+{"company": "couchetard", "year": 2021, "kpi": "net_income", "value_m": 2705.5, "source": "couchetard_2021 etats consolides des resultats"}
+{"company": "desjardins", "year": 2018, "kpi": "revenue", "value_m": 17312, "source": "desjardins_2020 tableau 11 resultats financiers et indicateurs"}
+{"company": "desjardins", "year": 2018, "kpi": "net_income", "value_m": 2326, "source": "desjardins_2020 tableau 11 resultats financiers et indicateurs"}
+{"company": "desjardins", "year": 2019, "kpi": "revenue", "value_m": 20757, "source": "desjardins_2020 tableau 11 resultats financiers et indicateurs"}
+{"company": "desjardins", "year": 2019, "kpi": "net_income", "value_m": 2598, "source": "desjardins_2020 tableau 11 resultats financiers et indicateurs"}
+{"company": "desjardins", "year": 2020, "kpi": "revenue", "value_m": 21473, "source": "desjardins_2020 tableau 11 resultats financiers et indicateurs"}
+{"company": "desjardins", "year": 2020, "kpi": "net_income", "value_m": 2419, "source": "desjardins_2020 tableau 11 resultats financiers et indicateurs"}
+{"company": "desjardins", "year": 2021, "kpi": "revenue", "value_m": 20320, "source": "desjardins_2025 tableau 51 etat combine du resultat (IFRS 4, avant IFRS 17)"}
+{"company": "desjardins", "year": 2021, "kpi": "net_income", "value_m": 2942, "source": "desjardins_2025 tableau 51 etat combine du resultat (IFRS 4, avant IFRS 17)"}
+{"company": "desjardins", "year": 2022, "kpi": "revenue", "value_m": 10340, "source": "desjardins_2025 tableau 51 etat combine du resultat (2022 retraite IFRS 17)"}
+{"company": "desjardins", "year": 2022, "kpi": "net_income", "value_m": 1242, "source": "desjardins_2025 tableau 51 etat combine du resultat (2022 retraite IFRS 17)"}
+{"company": "desjardins", "year": 2023, "kpi": "revenue", "value_m": 12577, "source": "desjardins_2025 tableau 51 etat combine du resultat"}
+{"company": "desjardins", "year": 2023, "kpi": "net_income", "value_m": 2259, "source": "desjardins_2025 tableau 51 etat combine du resultat"}
+{"company": "desjardins", "year": 2024, "kpi": "revenue", "value_m": 14660, "source": "desjardins_2025 tableau 51 etat combine du resultat"}
+{"company": "desjardins", "year": 2024, "kpi": "net_income", "value_m": 3356, "source": "desjardins_2025 tableau 51 etat combine du resultat"}
+{"company": "desjardins", "year": 2025, "kpi": "revenue", "value_m": 16308, "source": "desjardins_2025 tableau 51 etat combine du resultat"}
+{"company": "desjardins", "year": 2025, "kpi": "net_income", "value_m": 3811, "source": "desjardins_2025 tableau 51 etat combine du resultat"}

@@ -1,0 +1,110 @@
+[
+  {
+    "pdf": "banquenationale_2019.pdf",
+    "page": 57,
+    "label": "solde d'ouverture",
+    "figure": "8 608"
+  },
+  {
+    "pdf": "banquenationale_2017.pdf",
+    "page": 85,
+    "label": "certificats de dépôt",
+    "figure": "9 623"
+  },
+  {
+    "pdf": "banquenationale_2017.pdf",
+    "page": 85,
+    "label": "financement non garanti",
+    "figure": "33 021"
+  },
+  {
+    "pdf": "banquenationale_2020.pdf",
+    "page": 191,
+    "label": "payeur fixe",
+    "figure": "1,7"
+  },
+  {
+    "pdf": "aircanada_2021.pdf",
+    "page": 133,
+    "label": "au 31 décembre 2021",
+    "figure": "638"
+  },
+  {
+    "pdf": "aircanada_2021.pdf",
+    "page": 133,
+    "label": "amortissement",
+    "figure": "(104)"
+  },
+  {
+    "pdf": "couchetard_2020.pdf",
+    "page": 114,
+    "label": "salaires",
+    "figure": "2 394,0"
+  },
+  {
+    "pdf": "couchetard_2020.pdf",
+    "page": 114,
+    "label": "coût des ventes",
+    "figure": "44 397,7"
+  },
+  {
+    "pdf": "couchetard_2018.pdf",
+    "page": 50,
+    "label": "frais de restructuration",
+    "figure": "51,7"
+  },
+  {
+    "pdf": "couchetard_2018.pdf",
+    "page": 50,
+    "label": "baiia ajusté",
+    "figure": "2 979,4"
+  },
+  {
+    "pdf": "couchetard_2025.pdf",
+    "page": 121,
+    "label": "taux d'actualisation",
+    "figure": "4,8"
+  },
+  {
+    "pdf": "desjardins_2020.pdf",
+    "page": 205,
+    "label": "groupe d'assurances générales",
+    "figure": "90"
+  },
+  {
+    "pdf": "desjardins_2021.pdf",
+    "page": 120,
+    "label": "à la fin de l'exercice",
+    "figure": "1 088"
+  },
+  {
+    "pdf": "desjardins_2024.pdf",
+    "page": 238,
+    "label": "sinistres en suspens",
+    "figure": "(240)"
+  },
+  {
+    "pdf": "desjardins_2025.pdf",
+    "page": 224,
+    "label": "solde net à la fin",
+    "figure": "952"
+  },
+  {
+    "pdf": "cgi_2017.pdf",
+    "page": 100,
+    "label": "en pourcentage des revenus",
+    "figure": "14,7"
+  },
+  {
+    "pdf": "shopify_2025.pdf",
+    "page": 101,
+    "label": "deferral of revenue",
+    "figure": "224"
+  },
+  {
+    "pdf": "shopify_2025.pdf",
+    "page": 101,
+    "label": "balance, end of the year",
+    "figure": "398"
+  }
+]

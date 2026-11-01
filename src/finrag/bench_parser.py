@@ -1,0 +1,162 @@
+"""Compare the query parsers (regex, llm, hybrid) on questions whose filters are known.
+
+    python -m finrag.bench_parser                    # all three parsers
+    python -m finrag.bench_parser --parsers regex    # no LLM: one second
+    python -m finrag.bench_parser --show-errors
+
+Cases come from eval/parser_cases.jsonl (written with defaults on the first run: add your own wordings)
+and from the answerable questions of eval/questions.jsonl (company and fiscal year of their source).
+For each parser, companies and years are scored separately:
+  ok       the expected filter
+  wider    more than expected but including it (2020 and 2021 for "the pandemic year"): the right report
+           is still searched, among a few more
+  missed   no filter: the search covers more reports than needed (less precise, still possible)
+  WRONG    another filter: the right report is excluded, the answer becomes impossible. The figure to watch.
+"""
+import argparse
+import json
+import time
+
+from .config import ROOT
+from .query_filters import COMPANY_PATTERNS
+
+CASES_FILE = ROOT / "eval" / "parser_cases.jsonl"
+ALL = sorted(COMPANY_PATTERNS)
+
+# companies: expected list ("all" = every corpus company); years: expected fiscal years ([] = no year).
+DEFAULT_CASES = [
+    # relative and event-based wordings
+    {"q": "Quel était le résultat net d'Air Canada l'an dernier ?", "companies": ["aircanada"], "years": [2025]},
+    {"q": "What was CGI's revenue in the last fiscal year?", "companies": ["cgi"], "years": [2025]},
+    {"q": "Comment Air Canada a-t-elle traversé l'année de la pandémie ?", "companies": ["aircanada"], "years": [2020]},
+    {"q": "How did Shopify's revenue grow during the COVID-19 pandemic years?", "companies": ["shopify"], "years": [2020, 2021]},
+    {"q": "Quel était l'effectif de CGI à la fin de l'exercice précédant la pandémie ?", "companies": ["cgi"], "years": [2019]},
+    {"q": "What was Air Canada's net income in the year after the pandemic began?", "companies": ["aircanada"], "years": [2021]},
+    # abbreviations and indirect names
+    {"q": "Résultat net de la BN en 2022", "companies": ["banquenationale"], "years": [2022]},
+    {"q": "Quel est le ratio CET1 du Mouvement en 2023 ?", "companies": ["desjardins"], "years": [2023]},
+    {"q": "What was the net income of Circle K's parent company in fiscal 2021?", "companies": ["couchetard"], "years": [2021]},
+    {"q": "Résultat net d'aircanada en 2023", "companies": ["aircanada"], "years": [2023]},
+    {"q": "CET1 ratio of National-Bank in fiscal 2024", "companies": ["banquenationale"], "years": [2024]},
+    {"q": "FY2022 revenue of Shopify", "companies": ["shopify"], "years": [2022]},
+    {"q": "Shopify Q4 2020 revenue", "companies": ["shopify"], "years": [2020]},
+    {"q": "Résultats d'Air Canada au T2 2019", "companies": ["aircanada"], "years": [2019]},
+    # periods
+    {"q": "Évolution du nombre de magasins de Couche-Tard de 2019 à 2023", "companies": ["couchetard"], "years": [2019, 2020, 2021, 2022, 2023]},
+    {"q": "National Bank net income between fiscal 2020 and fiscal 2022", "companies": ["banquenationale"], "years": [2020, 2021, 2022]},
+    {"q": "Comment les revenus de Desjardins ont-ils évolué depuis 2021 ?", "companies": ["desjardins"], "years": [2021, 2022, 2023, 2024, 2025]},
+    {"q": "Quel a été le BAIIA de Couche-Tard au cours des trois derniers exercices ?", "companies": ["couchetard"], "years": [2023, 2024, 2025]},
+    {"q": "Air Canada's passenger revenue in 2019 versus 2021", "companies": ["aircanada"], "years": [2019, 2021]},
+    {"q": "Shopify's gross margin in 2023 compared with 2022", "companies": ["shopify"], "years": [2023]},
+    {"q": "Résultat net de la Banque Nationale sur les cinq derniers exercices", "companies": ["banquenationale"], "years": [2021, 2022, 2023, 2024, 2025]},
+    # several companies
+    {"q": "Compare le résultat net d'Air Canada et de CGI en 2023", "companies": ["aircanada", "cgi"], "years": [2023]},
+    {"q": "Desjardins et la Banque Nationale : ratio CET1 en 2023", "companies": ["banquenationale", "desjardins"], "years": [2023]},
+    {"q": "Comparer le résultat net de la BN et d'Air Canada en 2023", "companies": ["aircanada", "banquenationale"], "years": [2023]},
+    {"q": "Ratio CET1 du Mouvement et de la Banque Nationale en 2022", "companies": ["banquenationale", "desjardins"], "years": [2022]},
+    {"q": "Quel a été le résultat net d'Air Canada pour l'exercice qui a suivi 2019 ?", "companies": ["aircanada"], "years": [2020]},
+    {"q": "What was CGI's revenue in the year before 2021?", "companies": ["cgi"], "years": [2020]},
+    {"q": "Compare Air Canada, CGI and Shopify revenue from 2021 to 2023", "companies": ["aircanada", "cgi", "shopify"], "years": [2021, 2022, 2023]},
+    {"q": "Pour toutes les entreprises disponibles, quel a été le résultat net en 2024 ?", "companies": "all", "years": [2024]},
+    {"q": "Quel a été le résultat net de chaque entreprise en 2020 ?", "companies": "all", "years": [2020]},
+    {"q": "Which company had the highest revenue growth in 2022?", "companies": "all", "years": [2022]},
+    {"q": "Quelles entreprises ont versé un dividende en 2023 ?", "companies": "all", "years": [2023]},
+    {"q": "Which companies reported a net loss in 2020?", "companies": "all", "years": [2020]},
+    {"q": "Laquelle des entreprises a le plus d'employés ?", "companies": "all", "years": []},
+    {"q": "Quelle entreprise Air Canada a-t-elle acquise en 2019 ?", "companies": ["aircanada"], "years": [2019]},
+    {"q": "Parmi les entreprises du corpus, lesquelles publient en dollars américains ?", "companies": "all", "years": []},
+    # named report, no year, out-of-corpus years
+    {"q": "Selon le rapport annuel 2023 de Desjardins, quels sont les principaux risques ?", "companies": ["desjardins"], "years": [2023]},
+    {"q": "Quel est le dividende par action de la Banque Nationale ?", "companies": ["banquenationale"], "years": []},
+    {"q": "Quel était le résultat net de l'entreprise Air Canada pour l'exercice 2030 ?", "companies": ["aircanada"], "years": []},
+    {"q": "Résultat net de Couche-Tard pour l'exercice 2020", "companies": ["couchetard"], "years": [2020]},
+    # traps: companies outside the corpus must get no company filter
+    {"q": "What was WestJet's net income in 2019?", "companies": [], "years": []},
+    {"q": "Quel était le bénéfice de RBC en 2022 ?", "companies": [], "years": []},
+    {"q": "Quel était le chiffre d'affaires de Porter Airlines en 2023 ?", "companies": [], "years": []},
+    {"q": "Quel était le résultat net de Porter Airlines et d'Air Canada en 2023 ?", "companies": ["aircanada"], "years": [2023]},
+    {"q": "How many stores does 7-Eleven operate in Canada?", "companies": [], "years": []},
+]
+
+
+def expected_of(case: dict) -> tuple[list[str], list[int]]:
+    companies = ALL if case["companies"] == "all" else sorted(case["companies"])
+    return companies, sorted(case["years"])
+
+
+def got_of(plan: dict) -> tuple[list[str], list[int]]:
+    years = plan.get("years") or ([plan["year"]] if plan.get("year") else [])
+    if isinstance(years, int):
+        years = [years]
+    return sorted(plan.get("companies") or []), sorted(years)
+
+
+def grade(expected, got) -> str:
+    if got == expected:
+        return "ok"
+    if not got:
+        return "missed"
+    if expected and set(expected) <= set(got):
+        return "wider"
+    return "WRONG"
+
+
+def load_cases() -> list[dict]:
+    if not CASES_FILE.exists():
+        CASES_FILE.parent.mkdir(parents=True, exist_ok=True)
+        CASES_FILE.write_text("\n".join(json.dumps(c, ensure_ascii=False) for c in DEFAULT_CASES) + "\n",
+                              encoding="utf-8")
+        print(f"Cases written to {CASES_FILE} (add your own wordings).")
+    cases = [dict(json.loads(line), origin="cases") for line in CASES_FILE.open(encoding="utf-8") if line.strip()]
+    questions = ROOT / "eval" / "questions.jsonl"
+    if questions.exists():
+        for q in map(json.loads, (line for line in questions.open(encoding="utf-8") if line.strip())):
+            if q.get("answerable", True) and q.get("company"):
+                cases.append({"q": q["question"], "companies": [q["company"]],
+                              "years": [q["year"]] if q.get("year") else [], "origin": q["id"]})
+    return cases
+
+
+def main() -> None:
+    from .query_plan import plan_question
+    parser = argparse.ArgumentParser(description="Compare the query parsers on known filters.")
+    parser.add_argument("--parsers", nargs="*", default=["regex", "hybrid", "llm"], choices=["regex", "hybrid", "llm"])
+    parser.add_argument("--show-errors", action="store_true", help="list every missed or wrong filter")
+    args = parser.parse_args()
+    cases = load_cases()
+    n_cases = sum(c["origin"] == "cases" for c in cases)
+    print(f"{len(cases)} questions: {n_cases} from parser_cases.jsonl, {len(cases) - n_cases} from questions.jsonl\n")
+
+    rows, problems = [], []
+    for name in args.parsers:
+        counts = {f"{field}_{g}": 0 for field in ("company", "years") for g in ("ok", "wider", "missed", "WRONG")}
+        start = time.perf_counter()
+        for case in cases:
+            plan = plan_question(case["q"], name)
+            exp_c, exp_y = expected_of(case)
+            got_c, got_y = got_of(plan)
+            gc, gy = grade(exp_c, got_c), grade(exp_y, got_y)
+            counts[f"company_{gc}"] += 1
+            counts[f"years_{gy}"] += 1
+            if gc != "ok" or gy != "ok":
+                problems.append((name, case, (gc, gy), (got_c, got_y)))
+        seconds = (time.perf_counter() - start) / len(cases)
+        rows.append((name, counts, seconds))
+
+    print("| Parser | Company ok | wider | missed | WRONG | Years ok | wider | missed | WRONG | s/question |")
+    print("|---|---|---|---|---|---|---|---|---|---|")
+    for name, c, seconds in rows:
+        print(f"| {name} | {c['company_ok']} | {c['company_wider']} | {c['company_missed']} | {c['company_WRONG']} | "
+              f"{c['years_ok']} | {c['years_wider']} | {c['years_missed']} | {c['years_WRONG']} | {seconds:.2f} |")
+    print("\nNote: for questions.jsonl, the expected year is the year of the source report, which can differ "
+          "from the year asked (a 2024 figure taken from the 2025 report).")
+    if args.show_errors:
+        print()
+        for name, case, (gc, gy), (got_c, got_y) in problems:
+            exp_c, exp_y = expected_of(case)
+            print(f"- [{name}] {case['origin']} company {gc}, years {gy}: got {got_c or '-'} {got_y or '-'}, "
+                  f"expected {exp_c if case['companies'] != 'all' else 'all'} {exp_y or '-'} | {case['q'][:100]}")
+
+
+if __name__ == "__main__":
+    main()

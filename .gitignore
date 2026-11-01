@@ -1,0 +1,33 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Virtual environments
+myvenv/
+.venv/
+venv/
+
+# Data: PDFs (copyright), Docling cache, chunks, indexes, indicator table (rebuilt by the pipeline)
+data/
+*.pdf
+
+# Evaluation outputs (large, one file per run); the reference sets in eval/ are versioned
+eval/results/
+
+# Local settings and secrets
+.env
+.vscode/
+*.log
+
+# Office files and exports
+*.docx
+*.xlsx
+~$*
+
+# Old evaluation runs, and the pages extracted from the reports (copyright)
+eval/results_v1/
+eval/table_extraction/*/

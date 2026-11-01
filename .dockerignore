@@ -1,0 +1,13 @@
+# Only src/ and requirements-serve.txt go into the image; data/ is mounted at run time.
+.git
+.venv
+myvenv
+venv
+data
+eval/results
+**/__pycache__
+**/*.pyc
+.pytest_cache
+*.pdf
+*.docx
+.vscode

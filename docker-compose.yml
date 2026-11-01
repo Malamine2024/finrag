@@ -1,0 +1,72 @@
+# FinRAG in containers.
+#
+#   docker compose up --build                     API + demo; Ollama runs on the host (default)
+#   docker compose --profile ollama up --build    API + demo + Ollama in a container, on the GPU
+#
+# Demo: http://localhost:8501    API: http://localhost:8000/docs
+# The index (data/chroma), the BM25 index, the chunks and the indicator table (data/processed) come from
+# ./data, built beforehand with python -m finrag.ingest / index / kpis. The PDFs are not needed.
+name: finrag
+
+x-settings: &settings
+  # Host Ollama by default; with the "ollama" profile, set FINRAG_OLLAMA_HOST=http://ollama:11434 in .env.
+  # Not ${OLLAMA_HOST}: on the host, OLLAMA_HOST=0.0.0.0 is the address Ollama *listens* on, and Compose
+  # would hand it to the API as the address to *connect* to.
+  OLLAMA_HOST: ${FINRAG_OLLAMA_HOST:-http://host.docker.internal:11434}
+  FINRAG_LLM_MODEL: ${FINRAG_LLM_MODEL:-qwen3.5:9b}
+  FINRAG_EMBED_MODEL: ${FINRAG_EMBED_MODEL:-bge-m3}
+  FINRAG_PROMPT: ${FINRAG_PROMPT:-v5}
+  FINRAG_THINK: "off"
+  FINRAG_NUM_CTX: "8192"
+
+services:
+  api:
+    build: .
+    image: finrag:latest
+    environment: *settings
+    volumes:
+      - ./data:/app/data
+    ports:
+      - "8000:8000"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"    # the host's Ollama, also on Linux
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health', timeout=20)"]
+      interval: 30s
+      timeout: 25s
+      start_period: 20s
+      retries: 3
+    restart: unless-stopped
+
+  ui:
+    build: .
+    image: finrag:latest
+    command: ["streamlit", "run", "src/finrag/app.py", "--server.address", "0.0.0.0", "--server.port", "8501",
+              "--server.headless", "true", "--browser.gatherUsageStats", "false"]
+    environment:
+      FINRAG_API_URL: http://api:8000
+    ports:
+      - "8501:8501"
+    depends_on:
+      api:
+        condition: service_healthy
+    restart: unless-stopped
+
+  ollama:
+    profiles: ["ollama"]
+    image: ollama/ollama:latest
+    volumes:
+      - ollama:/root/.ollama                   # the models, kept between restarts
+    ports:
+      - "11434:11434"
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    restart: unless-stopped
+
+volumes:
+  ollama:
