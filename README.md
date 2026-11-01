@@ -4,6 +4,8 @@
 Every answer cites its sources (document and page), and every design choice is backed by a
 hand-verified evaluation set rather than by intuition.
 
+![FinRAG demo: indicator questions answered from the verified table, follow-up questions, cited answers from the reports](docs/demo.gif)
+
 > Status: phases A (baseline), B (table extraction), C (retrieval), D (verification, structured
 > indicators, COVID-19 study) and E (API, demo, conversational agent, tests, Docker) complete.
 
