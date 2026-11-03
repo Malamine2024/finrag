@@ -4,8 +4,6 @@
 Every answer cites its sources (document and page), and every design choice is backed by a
 hand-verified evaluation set rather than by intuition.
 
-![FinRAG demo: indicator questions answered from the verified table, follow-up questions, cited answers from the reports](docs/demo.gif)
-
 > Status: phases A (baseline), B (table extraction), C (retrieval), D (verification, structured
 > indicators, COVID-19 study) and E (API, demo, conversational agent, tests, Docker) complete.
 
@@ -372,6 +370,29 @@ The conversations were written with the agent, so this measures what it was desi
 written by someone else are the next test. 59 unit tests (`pytest`) cover the API, the router, the memory
 and the answers from the table, without Ollama.
 
+### Corpus analysis with PySpark: how much do reports repeat?
+
+`spark_corpus.py` measures finding 5 on the whole corpus with Spark (DataFrames, Spark SQL and a Spark ML
+pipeline): text passages of 200 characters or more become sets of word 3-grams, and MinHash LSH finds the
+pairs of near-duplicates (Jaccard similarity of at least 0.8) between consecutive reports of the same company,
+without comparing all 2.6 billion pairs.
+
+| Company | Text passages | Repeated from the previous year's report |
+|---|---|---|
+| National Bank | 8,022 | **36.2%** (45% in 2023) |
+| Desjardins | 9,036 | 26.5% (40% in 2025) |
+| Air Canada | 4,758 | 17.0% |
+| CGI | 6,033 | 14.3% |
+| Couche-Tard | 3,697 | 13.8% |
+| Shopify | 2,859 | 12.1% |
+| **Whole corpus** | **34,405** | **22.7%** |
+
+Almost one text passage in four already appears, nearly word for word, in the previous year's report, and
+more than one in three at National Bank: risk factors, accounting policies, regulatory definitions. This is
+a lower bound: tables (whose comparative columns repeat every figure of the previous year), paraphrases and
+paragraphs cut differently into chunks are not counted. It explains why the right page of the wrong year
+was retrieved until fiscal-year filters were added (phase C).
+
 ### Findings
 
 1. **The context window was not the problem.** Phase A runs with and without `num_ctx` give the same scores.
@@ -429,6 +450,10 @@ and the answers from the table, without Ollama.
 19. **A conversation propagates errors.** A rewritten follow-up that took a figure from the previous answer
     ("Why was net income 14,660 M$?") turned a wrong answer into a wrong question. The rewriting now sees
     the previous questions only.
+20. **A finding is stronger once it is measured on all the data.** "Reports repeat themselves" was an
+    observation from a few errors; on the whole corpus, 22.7% of text passages (36.2% at National Bank)
+    repeat the previous report almost word for word, which is why filters, not better embeddings, fixed
+    retrieval.
 
 ### Limitations
 
@@ -507,6 +532,7 @@ Indicators and the COVID-19 study:
 python -m finrag.kpis --crosscheck              # extract and cross-check -> data/processed/kpis.csv (about 1 hour)
 python -m finrag.kpis --finalize                # re-apply checks and eval/kpi_gold.jsonl, no LLM
 python -m finrag.covid --explain                # table, charts and explanations -> data/processed/covid_study.html
+python -m finrag.spark_corpus                   # PySpark: corpus statistics and year-to-year repetition (Java 17+)
 ```
 
 Settings (environment variables or `run_eval` options):
@@ -557,7 +583,8 @@ finrag/
 │   ├── agent.py           # E: router (indicator table or RAG), conversation memory
 │   ├── api.py             # E: FastAPI service
 │   ├── app.py             # E: Streamlit demo
-│   └── bench_agent.py     # E: multi-turn benchmark
+│   ├── bench_agent.py     # E: multi-turn benchmark
+│   └── spark_corpus.py    # PySpark: corpus statistics, near-duplicates between years (MinHash LSH)
 ├── tests/                 # pytest: API and agent, without Ollama
 ├── eval/
 │   ├── questions.jsonl    # reference set
